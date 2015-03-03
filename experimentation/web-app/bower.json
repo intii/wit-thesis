@@ -1,0 +1,13 @@
+{
+  "name": "wit-web-app",
+  "version": "0.0.0",
+  "homepage": "https://github.com/intii/wit-thesis",
+  "authors": [
+    "Inti Piolanti <ipiolanti@gmail.com>"
+  ],
+  "description": "A first wit.ai powered web app",
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "~1.11.2"
+  }
+}
