@@ -13,31 +13,29 @@ var voiceCommandDispatcher = function() {
     }
   }
 
-  function captureVoiceCommand(audioBuffer) {
-    if(!detectSilence(audioBuffer)) {
-      var channels = 1;
-      // Create an empty two second stereo buffer at the
-      // sample rate of the AudioContext
-      var myArrayBuffer = audioContext.createBuffer(channels, audioBuffer.length, audioContext.sampleRate);
-      var nowBuffering = myArrayBuffer.getChannelData(0);
-      for (var i = 0; i < audioBuffer.length; i++) {
-        nowBuffering[i] = audioBuffer[i];
+  function trimSilences(audioBuffer) {
+    while (audioBuffer.length > 0 && audioBuffer[0] <= SILENCE_THRESHOLD) {
+      audioBuffer.splice(0, 1);
+    }
+    while (audioBuffer.length > 0 && audioBuffer[audioBuffer.length - 1] <= SILENCE_THRESHOLD) {
+      audioBuffer.splice(audioBuffer.length - 1, 1);
+    }
+  }
+
+  function captureVoiceCommand(commandBuffer) {
+    var audioBuffer;
+    trimSilences(commandBuffer);
+    if (commandBuffer.length >= BUFF_SIZE_RENDERER) {
+      audioBuffer = audioContext.createBuffer(1, commandBuffer.length, audioContext.sampleRate);
+      audioBuffer.copyToChannel(new Float32Array(commandBuffer), 0);
+
+      if(audioBuffer.duration > 0.5 && !detectSilence(audioBuffer)) {
+        var source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        // source.start();
+        console.log('pause');
       }
-
-      // Get an AudioBufferSourceNode.
-      // This is the AudioNode to use when we want to play an AudioBuffer
-      var source = audioContext.createBufferSource();
-
-      // set the buffer in the AudioBufferSourceNode
-      source.buffer = myArrayBuffer;
-
-      // connect the AudioBufferSourceNode to the
-      // destination so we can hear the sound
-      source.connect(audioContext.destination);
-
-      // start the source playing
-      // source.start();
-      console.log('pause');
     }
   }
 
