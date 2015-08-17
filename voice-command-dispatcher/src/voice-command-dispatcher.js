@@ -1,7 +1,7 @@
 var voiceCommandDispatcher = function() {
   var audioContext;
   var BUFF_SIZE_RENDERER = 512;
-  var SILENCE_THRESHOLD = 0.00015;
+  var SILENCE_THRESHOLD = 0.015;
   var cachedBuffer = [];
 
   function createAudioContext() {
@@ -46,11 +46,11 @@ var voiceCommandDispatcher = function() {
     var index = audioBuffer.length -1;
     var end = limit ? audioBuffer.length - limit : 0;
     var avg;
-    for(index; index >= limit; index--) {
-      sum += audioBuffer[index];
+    for(index; index >= end; index--) {
+      sum += Math.abs(audioBuffer[index]);
     }
     avg = sum/BUFF_SIZE_RENDERER;
-    return Math.abs(avg) <= SILENCE_THRESHOLD;
+    return avg <= SILENCE_THRESHOLD;
   }
 
   function processInput(event) {
@@ -62,8 +62,9 @@ var voiceCommandDispatcher = function() {
     audioBuffer.copyToChannel(new Float32Array(cachedBuffer), 0);
 
     if (audioBuffer.duration >= 0.5 && detectSilence(cachedBuffer, 20000)) {
+    // if (audioBuffer.duration >= 0.5 && detectSilence(inputBuffer)) {
       console.log('Silence ---> ');
-      // captureVoiceCommand(cachedBuffer);
+      captureVoiceCommand(cachedBuffer);
       cachedBuffer = [];
     }
   }
